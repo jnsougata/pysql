@@ -1,2 +1,2 @@
 # pysql
-sqllite3 wrapper for non sql users
+sqlite3 wrapper for non sql users
