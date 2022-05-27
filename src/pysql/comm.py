@@ -1,7 +1,7 @@
 import sqlite3
 from typing import Dict, List, Any
 from .utils import Field, Types, Condition
-from .errors import *
+from .errors import PySQLException
 
 
 class PySQL:
@@ -39,9 +39,12 @@ class PySQL:
             query += f' OFFSET {start}'
         if condition:
             query += f' WHERE {condition.value}'
-
-        self.cursor.execute(query)
-        return self.cursor.fetchall()
+        try:
+            self.cursor.execute(query)
+        except sqlite3.OperationalError as e:
+            raise PySQLException(e) from None
+        else:
+            return self.cursor.fetchall()
 
     def insert(self, table: str, fields: List[Field]):
         cols = ', '.join(f.name for f in fields)
@@ -59,16 +62,20 @@ class PySQL:
                 container.append(val)
         query = (f'INSERT INTO {table} ({cols}) '
                  f'VALUES ({", ".join(container)})')
-        self.cursor.execute(query)
-        self.connection.commit()
-        return {f.name: f.value for f in fields}
+        try:
+            self.cursor.execute(query)
+        except sqlite3.OperationalError as e:
+            raise PySQLException(e) from None
+        else:
+            self.connection.commit()
+            return {f.name: f.value for f in fields}
 
     def create(self, table: str, columns: Dict[str, Types]):
         cols = ', '.join(f'{k} {v.value}' for k, v in columns.items())
         try:
             self.cursor.execute(f"CREATE TABLE {table} ({cols})")
-        except sqlite3.OperationalError:
-            raise AlreadyExists(f'Table `{table}` already exists in `{self.__path}`')
+        except sqlite3.OperationalError as e:
+            raise PySQLException(e) from None
         else:
             self.connection.commit()
             return self
