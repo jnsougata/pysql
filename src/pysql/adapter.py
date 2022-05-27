@@ -14,7 +14,8 @@ class PySQL:
 
     def show(self, table: str) -> None:
         self.cursor.execute(f'SELECT DISTINCT * FROM {table}')
-        print(tabulate(self.cursor.fetchall()))
+        headers = [i[0] for i in self.cursor.description]
+        print(tabulate(self.cursor.fetchall(), headers=headers))
 
     def select(
             self,
