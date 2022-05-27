@@ -1,4 +1,5 @@
 import sqlite3
+from tabulate import tabulate
 from typing import Dict, List, Any
 from .utils import Field, Types, Condition
 from .errors import PySQLException
@@ -11,9 +12,9 @@ class PySQL:
         self.connection = sqlite3.connect(self.__path)
         self.cursor = self.connection.cursor()
 
-    def view(self, table: str) -> None:
-        self.cursor.execute(f'SELECT * FROM {table}')
-        print(self.cursor.fetchall())
+    def show(self, table: str) -> None:
+        self.cursor.execute(f'SELECT DISTINCT * FROM {table}')
+        print(tabulate(self.cursor.fetchall()))
 
     def select(
             self,

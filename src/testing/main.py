@@ -2,7 +2,7 @@ from src.pysql import PySQL, Types, Field, Condition
 
 db = PySQL('root.db')
 db.insert(
-    'allusers',
+    'users',
     [
         Field('id', 100),
         Field('age', 22),
@@ -10,5 +10,4 @@ db.insert(
 
     ]
 )
-data = db.select('allusers', ['id', 'name', 'age'], order_by=['age', 'id'])
-print(data)
+db.show('users')
